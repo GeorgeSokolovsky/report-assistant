@@ -2,7 +2,6 @@ import * as _ from 'lodash';
 
 export class Entity {
   public id: number;
-  public name: string;
 
   public constructor(params?: object) {
     _.forEach(params, (value: any, key: string) => {

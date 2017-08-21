@@ -1,24 +1,24 @@
-import { Entity } from '../src/models/Entity';
-import { Cloth } from '../src/models/Cloth';
-import { Employee } from '../src/models/Employee';
+import { Entity } from '../src/models/entity';
+import { Clothes } from '../src/models/clothes';
+import { Employee } from '../src/models/employee';
 
 export const config = {
   path: {
-    cloth: 'examples/ex.csv',
-    employee: 'examples/ex.csv'
+    clothes: '/examples/ex.csv',
+    employee: '/examples/ex.csv'
   },
   collections: {
-    cloth: 'cloth',
+    clothes: 'clothes',
     employee: 'employee'
   },
   classes: {
     entity: Entity,
-    cloth: Cloth,
+    clothes: Clothes,
     employee: Employee
   },
   name: {
     entity: 'entity',
-    cloth: 'cloth',
+    clothes: 'clothes',
     employee: 'employee'
   }
 };

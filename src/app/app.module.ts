@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
+import { EntitiesStorage } from '../services/entities.store.service';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { AppComponent } from './app.component';
     FormsModule
   ],
   entryComponents: [ AppComponent ],
+  providers: [ EntitiesStorage],
   bootstrap: [ AppComponent ]
 })
 export class AppModule { }

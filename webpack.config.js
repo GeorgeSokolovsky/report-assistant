@@ -12,7 +12,13 @@ const entryPoints = ['inline', 'polyfills', 'styles', 'vendor', 'app'];
 module.exports = function (options, webpackOptions) {
   options = options || {};
 
-  let config = {};
+  let config = {
+    node: {
+      __dirname: false,
+      fs: "empty"
+    },
+    target: 'electron-renderer'
+  };
 
   config = webpackMerge({}, config, {
     entry: getEntry(options),
