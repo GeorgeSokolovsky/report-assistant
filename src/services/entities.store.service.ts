@@ -22,13 +22,13 @@ export class EntitiesStorage {
   }
 
   public loadClothes(): Observable<Clothes[]> {
-    return this.loadEntity(config.name.clothes)
+    return this.loadEntity<Clothes>(config.name.clothes)
       .do(clothes => this.entitiesStore[config.collections.clothes] = clothes)
       .do(clothes => this.updateIdsStore(_.last(clothes)));
   }
 
   public loadEmployee(): Observable<Employee[]> {
-    return this.loadEntity(config.name.employee)
+    return this.loadEntity<Employee>(config.name.employee)
       .do(employees => this.entitiesStore[config.collections.employee] = employees)
       .do(employees => this.updateIdsStore(_.last(employees)));
   }
@@ -41,7 +41,7 @@ export class EntitiesStorage {
     return this.getEntity(config.name.employee, id);
   }
 
-  private loadEntity(name: string): Observable<Entity[]> {
+  private loadEntity<T extends Entity>(name: string): Observable<T[]> {
     const {path, classes} = config;
 
     return Observable.create((observer) => {
@@ -66,10 +66,10 @@ export class EntitiesStorage {
     });
   }
 
-  private getEntity(name: string, id: number): Entity {
+  private getEntity<T extends Entity>(name: string, id: number): T {
     const collection = this.entitiesStore[_.get<string>(config.collections, name)];
 
-    return _.find<Entity>(collection, {id});
+    return _.find(collection, {id}) as T;
   }
 
   private saveEntity(collectionName: string, entity: Entity): void {
