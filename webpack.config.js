@@ -7,7 +7,7 @@ const copy = require('copy-webpack-plugin');
 const extract = require('extract-text-webpack-plugin');
 const circular = require('circular-dependency-plugin');
 const nodeModules = resolve(__dirname, 'node_modules');
-const entryPoints = ['inline', 'polyfills', 'styles', 'vendor', 'app'];
+const entryPoints = ['inline', 'polyfills', 'vendor', 'app'];
 
 module.exports = function (options, webpackOptions) {
   options = options || {};
@@ -177,10 +177,8 @@ function getDevStylesConfig() {
   return {
     module: {
       rules: [
-        { test: /\.css$/, use: ['style-loader', 'css-loader'], exclude: [root('src')] },
-        { test: /\.css$/, use: ['to-string-loader', 'css-loader'], exclude: [root('src/styles')] },
-        { test: /\.scss$|\.sass$/, use: ['style-loader', 'css-loader', 'sass-loader'], include: [root('src/styles') ] },
-        { test: /\.scss$|\.sass$/, use: ['to-string-loader', 'css-loader', 'sass-loader'], exclude: [root('src/styles')] },
+        { test: /\.css$/, use: ['to-string-loader', 'style-loader', 'css-loader'] },
+        { test: /\.scss$|\.sass$/, use: ['to-string-loader', 'style-loader', 'css-loader', 'sass-loader'] },
       ]
     }
   };
@@ -193,10 +191,8 @@ function getProdStylesConfig() {
     ],
     module: {
       rules: [
-        { test: /\.css$/, use: extract.extract({ fallback: 'style-loader', use: 'css-loader' }), include: [root('src/styles')] },
-        { test: /\.css$/, use: ['to-string-loader', 'css-loader'], exclude: [root('src/styles')] },
-        { test: /\.scss$|\.sass$/, loader: extract.extract({ fallback: 'style-loader', use: ['css-loader', 'sass-loader'] }), exclude: [root('src/app')] },
-        { test: /\.scss$|\.sass$/, use: ['to-string-loader', 'css-loader', 'sass-loader'], exclude: [root('src/styles')] },
+        { test: /\.css$/, use: ['to-string-loader', 'style-loader', 'css-loader'] },
+        { test: /\.scss$|\.sass$/, use: ['to-string-loader', 'style-loader', 'css-loader', 'sass-loader'] },
       ]
     }
   };

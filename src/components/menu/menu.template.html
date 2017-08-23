@@ -1,0 +1,19 @@
+<div class="menu-list__wrapper">
+  <ul class="menu-list">
+    <li class="menu-list_item">
+      <span class="link menu-list_item__title" (click)="toggleTab('create')">Создать</span>
+      <ul class="menu-list" *ngIf="isTabElementsVisible('create')">
+        <li class="menu-list_item__small">Заявка</li>
+        <li class="menu-list_item__small">Сотрудник</li>
+        <li class="menu-list_item__small">Вещь</li>
+      </ul>
+    </li>
+    <li class="menu-list_item">
+      <span class="link menu-list_item__title" (click)="toggleTab('show')">Просмотр</span>
+      <ul class="menu-list" *ngIf="isTabElementsVisible('show')">
+        <li class="menu-list_item__small">Заявки на верхнюю одежду</li>
+        <li class="menu-list_item__small">Заявки на обувь</li>
+      </ul>
+    </li>
+  </ul>
+</div>

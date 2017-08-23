@@ -5,6 +5,7 @@ import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { EntitiesStorage } from '../services/entities.store.service';
+import { ComponentsModule } from '../components/components.module';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { EntitiesStorage } from '../services/entities.store.service';
     BrowserModule,
     CommonModule,
     HttpModule,
-    FormsModule
+    FormsModule,
+    ComponentsModule
   ],
   entryComponents: [ AppComponent ],
   providers: [ EntitiesStorage],

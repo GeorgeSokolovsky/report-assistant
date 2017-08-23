@@ -12,7 +12,6 @@ const shouldBuildAll = argv.all || false;
 const arch = argv.arch || 'all';
 const platform = argv.platform || 'darwin';
 const winstaller = require('electron-winstaller');
-const debianinstaller = require('electron-installer-debian');
 const createdmg = require('electron-installer-dmg');
 
 const DEFAULT_OPTS = {
@@ -39,6 +38,8 @@ pack(platform, arch, (err, appPath) => {
         console.log('Windows Installer created.');
       });
     } else if (platform === 'linux') {
+      const debianinstaller = require('electron-installer-debian');
+
       debianinstaller({
         src: appPath,
         dest: join(__dirname, 'dist'),
