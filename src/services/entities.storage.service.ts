@@ -7,6 +7,8 @@ import { Observable } from 'rxjs/Observable';
 import { Entity } from '../models/entity';
 import { Clothes } from '../models/clothes';
 import { Employee } from '../models/employee';
+import { defaultEntities } from './defaultEntities';
+import { Application } from '../models/application';
 
 const { remote } = require('electron');
 const fs = remote.require('fs');
@@ -18,7 +20,8 @@ export class EntitiesStorage {
   private entitiesStore: {[collectionName: string]: Entity[]} = {};
 
   public loadAll(): Observable<boolean> {
-    return Observable.zip(this.loadClothes(), this.loadEmployee()).map(res => _.isEmpty(res));
+    return Observable.zip(this.loadClothes(), this.loadEmployee(), this.loadApplications())
+      .map(res => _.isEmpty(res));
   }
 
   public loadClothes(): Observable<Clothes[]> {
@@ -33,12 +36,29 @@ export class EntitiesStorage {
       .do(employees => this.updateIdsStore(_.last(employees)));
   }
 
-  public getCloth(id: number): Clothes {
-   return this.getEntity(config.name.clothes, id);
+  public loadApplications(): Observable<Application[]> {
+    return this.loadEntity<Application>(config.name.application)
+      .do(applications => this.entitiesStore[config.collections.application] = applications)
+      .do(applications => this.updateIdsStore(_.last(applications)));
+  }
+
+  public getCloth(siz: number): Clothes {
+    const collectionName = _.get<string>(config.collections, 'clothes');
+    const collection = this.entitiesStore[collectionName] as Clothes[];
+
+    return _.find(collection, {siz});
+  }
+
+  public getEmployees(): Employee[] {
+    return this.entitiesStore['employee'] as Employee[];
   }
 
   public getEmployee(id: number): Employee {
     return this.getEntity(config.name.employee, id);
+  }
+
+  public saveApplication(application: Application): Application {
+    return this.saveEntity('application', application) as Application;
   }
 
   private loadEntity<T extends Entity>(name: string): Observable<T[]> {
@@ -54,7 +74,7 @@ export class EntitiesStorage {
 
         parser(data, {}, (source) => {
           const entityClass = _.get(classes, name, Entity);
-          const entities = _(source)
+          const entities = _(source || defaultEntities[name])
             .map(entity => new entityClass(entity))
             .orderBy('id')
             .value();
@@ -72,7 +92,7 @@ export class EntitiesStorage {
     return _.find(collection, {id}) as T;
   }
 
-  private saveEntity(collectionName: string, entity: Entity): void {
+  private saveEntity(collectionName: string, entity: Entity): Entity {
     this.updateEntityId(entity);
     this.pushEntity(collectionName, entity);
 
@@ -80,11 +100,17 @@ export class EntitiesStorage {
       // todo fix this
       console.log('something saved');
     });
+
+    return entity;
   }
 
   private updateEntityId(entity: Entity): Entity {
     if (entity.id) {
       return;
+    }
+
+    if (!this.idsStore[entity.getClassName()]) {
+      this.idsStore[entity.getClassName()] = 0;
     }
 
     this.idsStore[entity.getClassName()] += 1;

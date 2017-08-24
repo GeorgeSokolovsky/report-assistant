@@ -1,0 +1,54 @@
+<form [formGroup]="applicationForm">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group" [ngClass]="{'has-error': hasError('employee')}">
+        <label for="fio">ФИО</label>
+        <select formControlName="employee" id="fio" multiple class="form-control scrollbar">
+          <option *ngFor="let employee of employees" value="{{employee.id}}">{{employee.fio}}</option>
+        </select>
+        <span *ngIf="hasError('employee')"
+              class="help-block">
+          Обязательно для заполнения
+        </span>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group" [ngClass]="{'has-error': hasError('month')}">
+        <label for="month">Месяц</label>
+        <select formControlName="month" id="month" class="form-control">
+          <option *ngFor="let month of months" value="{{month.value}}">{{month.name}}</option>
+        </select>
+        <span *ngIf="hasError('month')"
+              class="help-block">
+          Обязательно для заполнения
+        </span>
+      </div>
+      <div class="form-group" [ngClass]="{'has-error': hasError('year')}">
+        <label for="year">Год</label>
+        <select formControlName="year" id="year" class="form-control">
+          <option>2015</option>
+          <option>2016</option>
+          <option>2017</option>
+        </select>
+        <span *ngIf="hasError('year')"
+              class="help-block">
+          Обязательно для заполнения
+        </span>
+      </div>
+      <div class="form-group" [ngClass]="{'has-error': hasError('siz')}">
+        <label for="siz">СИЗ</label>
+        <input formControlName="siz" id="siz" class="form-control" placeholder="Введите номер СИЗ">
+        <span *ngIf="hasError('siz')"
+              class="help-block">
+          Обязательно для заполнения
+        </span>
+      </div>
+      <button class="btn btn-success"
+              [disabled]="applicationForm.invalid"
+              (click)="addApplication()">
+        Добавить
+      </button>
+    </div>
+  </div>
+</form>
+<app-applications-list [applications]="applications" (onRemove)="removeApplication($event)"></app-applications-list>

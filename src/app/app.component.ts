@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { EntitiesStorage } from '../services/entities.store.service';
+import { EntitiesStorage } from '../services/entities.storage.service'
 
 @Component({
   encapsulation: ViewEncapsulation.None,
