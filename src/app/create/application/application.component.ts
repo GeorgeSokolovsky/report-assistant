@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as _ from 'lodash';
-import { defaultEntities } from '../../../services/defaultEntities';
 import { Employee } from '../../../models/employee';
 import { EntitiesStorage } from '../../../services/entities.storage.service';
 import { months } from '../../../services/months';
@@ -14,7 +13,7 @@ import { Application } from '../../../models/application';
   styleUrls: ['application.styles.scss']
 })
 export class ApplicationComponent implements OnInit {
-  public applications = defaultEntities.application;
+  public applications = [];
   public months = months;
   public employees: Employee[];
   private applicationForm: FormGroup;
@@ -52,6 +51,8 @@ export class ApplicationComponent implements OnInit {
 
   public removeApplication(applicationId: number) {
     _.remove(this.applications, {id: applicationId});
+
+    this.storage.removeApplication(applicationId);
   }
 
   public hasError(fieldName: string): boolean {

@@ -58,7 +58,27 @@ export class EntitiesStorage {
   }
 
   public saveApplication(application: Application): Application {
-    return this.saveEntity('application', application) as Application;
+    const {collections} = config;
+
+    return this.saveEntity(collections.application, application) as Application;
+  }
+
+  public saveEmployee(employee: Employee): Employee {
+    const {collections} = config;
+
+    return this.saveEntity(collections.employee, employee) as Employee;
+  }
+
+  public saveClothes(clothes: Clothes): Clothes {
+    const {collections} = config;
+
+    return this.saveEntity(collections.clothes, clothes) as Clothes;
+  }
+
+  public removeApplication(id: number) {
+    const {application} = config.collections;
+
+    _.remove(this.entitiesStore[application], {id});
   }
 
   private loadEntity<T extends Entity>(name: string): Observable<T[]> {
