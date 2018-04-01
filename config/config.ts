@@ -5,9 +5,9 @@ import { Application } from '../src/models/application';
 
 export const config = {
   path: {
-    clothes: '/examples/ex.csv',
-    employee: '/examples/ex.csv',
-    application: '/examples/ex.csv'
+    clothes: '/data/clothes.csv',
+    employee: '/data/employee.csv',
+    application: '/data/application.csv'
   },
   collections: {
     clothes: 'clothes',

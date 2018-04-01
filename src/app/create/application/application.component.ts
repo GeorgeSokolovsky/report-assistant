@@ -50,7 +50,7 @@ export class ApplicationComponent implements OnInit {
   }
 
   public removeApplication(applicationId: number) {
-    _.remove(this.applications, {id: applicationId});
+    _.remove(this.applications, ['id', applicationId]);
 
     this.storage.removeApplication(applicationId);
   }

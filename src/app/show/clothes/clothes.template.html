@@ -1,0 +1,18 @@
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>СИЗ</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let c of clothesList">
+                <td>{{c.name}}</td>
+                <td>{{c.siz}}</td>
+                <td><button class="btn btn-danger" (click)="removeClothes(c)">X</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

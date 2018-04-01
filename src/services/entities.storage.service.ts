@@ -19,12 +19,16 @@ export class EntitiesStorage {
   private idsStore: {[className: string]: number} = {};
   private entitiesStore: {[collectionName: string]: Entity[]} = {};
 
-  public loadAll(): Observable<boolean> {
+  constructor() {
+      this.initFoldersAndFiles();
+  }
+
+  loadAll(): Observable<boolean> {
     return Observable.zip(this.loadClothes(), this.loadEmployee(), this.loadApplications())
       .map(res => _.isEmpty(res));
   }
 
-  public loadClothes(): Observable<Clothes[]> {
+  loadClothes(): Observable<Clothes[]> {
     return this.loadEntity<Clothes>(config.name.clothes)
       .do(clothes => this.entitiesStore[config.collections.clothes] = clothes)
       .do(clothes => this.updateIdsStore(_.last(clothes)));
@@ -43,14 +47,14 @@ export class EntitiesStorage {
   }
 
   public getCloth(siz: number): Clothes {
-    const collectionName = _.get<string>(config.collections, 'clothes');
+    const collectionName = _.get(config.collections, 'clothes');
     const collection = this.entitiesStore[collectionName] as Clothes[];
 
     return _.find(collection, {siz});
   }
 
   public getEmployees(): Employee[] {
-    return this.entitiesStore['employee'] as Employee[];
+    return this.entitiesStore.employee as Employee[];
   }
 
   public getEmployee(id: number): Employee {
@@ -85,7 +89,7 @@ export class EntitiesStorage {
     const {path, classes} = config;
 
     return Observable.create((observer) => {
-      const file = join(__dirname, '..', _.get(path, name));
+      const file = join(__dirname, _.get(path, name));
 
       fs.readFile(file, {encoding: 'utf-8'}, (err, data) => {
         if (err) {
@@ -107,7 +111,7 @@ export class EntitiesStorage {
   }
 
   private getEntity<T extends Entity>(name: string, id: number): T {
-    const collection = this.entitiesStore[_.get<string>(config.collections, name)];
+    const collection = this.entitiesStore[_.get(config.collections, name)];
 
     return _.find(collection, {id}) as T;
   }
@@ -116,9 +120,12 @@ export class EntitiesStorage {
     this.updateEntityId(entity);
     this.pushEntity(collectionName, entity);
 
-    stringify(this.entitiesStore[entity.getClassName()], () => {
-      // todo fix this
-      console.log('something saved');
+    const entityClassName = entity.getClassName();
+
+    stringify(this.entitiesStore[entityClassName], (err, out) => {
+      if (err) throw err;
+
+      fs.writeFileSync(`${__dirname}${config.path[entityClassName]}`, out);
     });
 
     return entity;
@@ -162,5 +169,40 @@ export class EntitiesStorage {
     }
 
     this.entitiesStore[collectionName].push(entity);
+  }
+
+  private createFile(path: string): Promise<boolean> {
+    const updatedPath = __dirname + path;
+
+    if (fs.existsSync(updatedPath)) {
+      return Promise.resolve(true);
+    }
+
+    return new Promise((res, rej) => {
+      fs.open(updatedPath, 'wx', (err, fd) => {
+        if (err) rej(err);
+
+        fs.close(fd, err => {
+          if (err) rej(err);
+
+          res(true);
+        });
+      });
+    });
+  }
+
+  private initFoldersAndFiles() {
+      const dir = `${__dirname}/data`;
+
+      if (!fs.existsSync(dir)){
+          fs.mkdirSync(dir);
+      }
+
+      this.createFile(config.path.application)
+          .then(() => this.createFile(config.path.clothes))
+          .then(() => this.createFile(config.path.employee))
+          .catch(err => {
+              throw err;
+          });
   }
 }

@@ -17,22 +17,21 @@ export class ApplicationsListComponent {
     moment.locale('ru');
   }
 
-  @Input('applications') public set applications(applications: IApplication[]) {
-    this._applications = _.map(applications, app => {
-      return {
+  @Input('applications') set applications(applications: IApplication[]) {
+    this._applications = _.map(applications, app => ({
         id: app.id,
         employee: this.storage.getEmployee(app.employeeId),
         clothes: this.storage.getCloth(app.clothesSiz),
         date: moment(app.date).format('MMMM YYYY')
-      };
-    });
+      })
+    );
   }
 
-  public getApplications(): IApplicationView[] {
+  getApplications(): IApplicationView[] {
     return this._applications;
   }
 
-  public removeApplication(app: IApplicationView) {
+  removeApplication(app: IApplicationView) {
     this.onRemove.emit(app.id);
 
     _.pull(this._applications, app);

@@ -12,7 +12,7 @@
     <tr *ngFor="let app of getApplications()">
       <td>{{app.employee.fio}}</td>
       <td>{{app.date}}</td>
-      <td>{{app.clothes.name}}</td>
+      <td>{{app.clothes?.name}}</td>
       <td><button class="btn btn-danger" (click)="removeApplication(app)">X</button></td>
     </tr>
     </tbody>

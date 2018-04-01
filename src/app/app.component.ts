@@ -11,7 +11,7 @@ export class AppComponent implements OnInit {
   constructor(private storage: EntitiesStorage) {
   }
 
-  public ngOnInit() {
+  ngOnInit() {
     this.storage.loadAll().subscribe();
   }
 }
