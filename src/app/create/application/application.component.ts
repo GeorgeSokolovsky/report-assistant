@@ -43,7 +43,7 @@ export class ApplicationComponent implements OnInit {
         clothesSiz: Number(siz)
       };
 
-      return this.storage.saveApplication(new Application(applicationData));
+      return new Application(applicationData);
     });
 
     this.applications = this.applications.concat(applications);

@@ -24,8 +24,9 @@ export class EmployeeComponent implements OnInit {
   }
 
   public createEmployee() {
-    this.storage.saveEmployee(new Employee(this.employeeForm.value));
-
-    this.employeeForm.reset();
+    this.storage.saveEmployee(new Employee(this.employeeForm.value))
+        .subscribe(() => {
+            this.employeeForm.reset();
+        });
   }
 }

@@ -22,8 +22,9 @@ export class ClothesComponent implements OnInit {
   }
 
   public createClothes() {
-    this.storage.saveClothes(new Clothes(this.clothesForm.value));
-
-    this.clothesForm.reset();
+    this.storage.saveClothes(new Clothes(this.clothesForm.value))
+        .subscribe(() => {
+            this.clothesForm.reset();
+        });
   }
 }

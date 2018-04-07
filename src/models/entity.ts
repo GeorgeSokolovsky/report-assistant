@@ -1,9 +1,9 @@
 import * as _ from 'lodash';
 
 export class Entity {
-  public id: number;
+  id: number;
 
-  public constructor(params?: object) {
+  constructor(params?: object) {
     _.forEach(params, (value, key) => {
       if (!_.isArray(value)) {
         this[key] = value;
@@ -11,7 +11,7 @@ export class Entity {
     });
   }
 
-  public getClassName(): string {
+  getClassName(): string {
     return this.constructor.toString().match(/\w+/g)[1].toLowerCase();
   }
 }

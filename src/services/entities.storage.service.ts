@@ -1,5 +1,4 @@
 import * as _ from 'lodash';
-import * as parser from 'csv-parse';
 import * as stringify from 'csv-stringify';
 import { Injectable } from '@angular/core';
 import { config } from '../../config/config';
@@ -7,8 +6,8 @@ import { Observable } from 'rxjs/Observable';
 import { Entity } from '../models/entity';
 import { Clothes } from '../models/clothes';
 import { Employee } from '../models/employee';
-import { defaultEntities } from './defaultEntities';
 import { Application } from '../models/application';
+import { DB } from '../db/DB';
 
 const { remote } = require('electron');
 const fs = remote.require('fs');
@@ -23,112 +22,91 @@ export class EntitiesStorage {
       this.initFoldersAndFiles();
   }
 
-  loadAll(): Observable<boolean> {
-    return Observable.zip(this.loadClothes(), this.loadEmployee(), this.loadApplications())
-      .map(res => _.isEmpty(res));
+  loadAll(): Observable<[Clothes[], Employee[], Application[]]> {
+    return Observable.zip(this.loadClothes(), this.loadEmployee(), this.loadApplications());
   }
 
   loadClothes(): Observable<Clothes[]> {
-    return this.loadEntity<Clothes>(config.name.clothes)
+    return this.loadEntities<Clothes>(config.name.clothes)
       .do(clothes => this.entitiesStore[config.collections.clothes] = clothes)
       .do(clothes => this.updateIdsStore(_.last(clothes)));
   }
 
-  public loadEmployee(): Observable<Employee[]> {
-    return this.loadEntity<Employee>(config.name.employee)
+  loadEmployee(): Observable<Employee[]> {
+    return this.loadEntities<Employee>(config.name.employee)
       .do(employees => this.entitiesStore[config.collections.employee] = employees)
       .do(employees => this.updateIdsStore(_.last(employees)));
   }
 
-  public loadApplications(): Observable<Application[]> {
-    return this.loadEntity<Application>(config.name.application)
+  loadApplications(): Observable<Application[]> {
+    return this.loadEntities<Application>(config.name.application)
       .do(applications => this.entitiesStore[config.collections.application] = applications)
       .do(applications => this.updateIdsStore(_.last(applications)));
   }
 
-  public getCloth(siz: number): Clothes {
+  getCloth(siz: number): Clothes {
     const collectionName = _.get(config.collections, 'clothes');
     const collection = this.entitiesStore[collectionName] as Clothes[];
 
     return _.find(collection, {siz});
   }
 
-  public getEmployees(): Employee[] {
+  getEmployees(): Employee[] {
     return this.entitiesStore.employee as Employee[];
   }
 
-  public getEmployee(id: number): Employee {
+  getEmployee(id: number): Employee {
     return this.getEntity(config.name.employee, id);
   }
 
-  public saveApplication(application: Application): Application {
+  saveApplication(application: Application): Observable<Application> {
     const {collections} = config;
 
-    return this.saveEntity(collections.application, application) as Application;
+    return this.saveEntity<Application>(collections.application, application);
   }
 
-  public saveEmployee(employee: Employee): Employee {
+  saveEmployee(employee: Employee): Observable<Employee> {
     const {collections} = config;
 
-    return this.saveEntity(collections.employee, employee) as Employee;
+    return this.saveEntity<Employee>(collections.employee, employee);
   }
 
-  public saveClothes(clothes: Clothes): Clothes {
+  saveClothes(clothes: Clothes): Observable<Clothes> {
     const {collections} = config;
 
-    return this.saveEntity(collections.clothes, clothes) as Clothes;
+    return this.saveEntity<Clothes>(collections.clothes, clothes);
   }
 
-  public removeApplication(id: number) {
+  removeApplication(id: number) {
     const {application} = config.collections;
 
     _.remove(this.entitiesStore[application], {id});
   }
 
-  private loadEntity<T extends Entity>(name: string): Observable<T[]> {
+  private loadEntities<T extends Entity>(name: string): Observable<T[]> {
     const {path, classes} = config;
+    const file = join(__dirname, _.get(path, name));
+    const entityClass = _.get(classes, name, Entity);
 
-    return Observable.create((observer) => {
-      const file = join(__dirname, _.get(path, name));
-
-      fs.readFile(file, {encoding: 'utf-8'}, (err, data) => {
-        if (err) {
-          throw err;
-        }
-
-        parser(data, {}, (source) => {
-          const entityClass = _.get(classes, name, Entity);
-          const entities = _(source || defaultEntities[name])
-            .map(entity => new entityClass(entity))
-            .orderBy('id')
-            .value();
-
-          observer.next(entities);
-          observer.complete();
-        });
-      });
-    });
+    return DB.readFrom(file, entityClass);
   }
 
   private getEntity<T extends Entity>(name: string, id: number): T {
-    const collection = this.entitiesStore[_.get(config.collections, name)];
+    const collectionName = _.get(config.collections, name);
+    const collection = this.entitiesStore[collectionName];
 
     return _.find(collection, {id}) as T;
   }
 
-  private saveEntity(collectionName: string, entity: Entity): Entity {
+  private saveEntity<T extends Entity>(collectionName: string, entity: T): Observable<T> {
     this.updateEntityId(entity);
     this.pushEntity(collectionName, entity);
 
     const entityClassName = entity.getClassName();
+    const entities = this.entitiesStore[entityClassName] as T[];
 
-    stringify(this.entitiesStore[entityClassName], (err, out) => {
-      if (err) throw err;
-
-      fs.writeFileSync(`${__dirname}${config.path[entityClassName]}`, out);
-    });
-
-    return entity;
+    return DB.writeTo<T>(`${__dirname}${config.path[entityClassName]}`, entities)
+        .map(() => entity);
   }
 
   private updateEntityId(entity: Entity): Entity {
