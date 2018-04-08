@@ -93,7 +93,7 @@ function pack(plat, arch, cb) {
     prune: true,
     overwrite: true,
     all: shouldBuildAll,
-    out: `dist`
+    out: 'dist'
   });
 
   packager(opts, cb);

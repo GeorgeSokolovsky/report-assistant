@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
-import * as stringify from 'csv-stringify';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { config } from '../../config/config';
 import { Observable } from 'rxjs/Observable';
 import { Entity } from '../models/entity';
@@ -9,8 +8,6 @@ import { Employee } from '../models/employee';
 import { Application } from '../models/application';
 import { DB } from '../db/DB';
 
-const { remote } = require('electron');
-const fs = remote.require('fs');
 const { join } = require('path');
 
 @Injectable()
@@ -18,9 +15,7 @@ export class EntitiesStorage {
   private idsStore: {[className: string]: number} = {};
   private entitiesStore: {[collectionName: string]: Entity[]} = {};
 
-  constructor() {
-      this.initFoldersAndFiles();
-  }
+  constructor(private zone: NgZone) {}
 
   loadAll(): Observable<[Clothes[], Employee[], Application[]]> {
     return Observable.zip(this.loadClothes(), this.loadEmployee(), this.loadApplications());
@@ -105,8 +100,10 @@ export class EntitiesStorage {
     const entityClassName = entity.getClassName();
     const entities = this.entitiesStore[entityClassName] as T[];
 
-    return DB.writeTo<T>(`${__dirname}${config.path[entityClassName]}`, entities)
-        .map(() => entity);
+    return this.zone.runOutsideAngular(() =>
+        DB.writeTo<T>(`${__dirname}${config.path[entityClassName]}`, entities)
+            .map(() => entity)
+    );
   }
 
   private updateEntityId(entity: Entity): Entity {
@@ -147,40 +144,5 @@ export class EntitiesStorage {
     }
 
     this.entitiesStore[collectionName].push(entity);
-  }
-
-  private createFile(path: string): Promise<boolean> {
-    const updatedPath = __dirname + path;
-
-    if (fs.existsSync(updatedPath)) {
-      return Promise.resolve(true);
-    }
-
-    return new Promise((res, rej) => {
-      fs.open(updatedPath, 'wx', (err, fd) => {
-        if (err) rej(err);
-
-        fs.close(fd, err => {
-          if (err) rej(err);
-
-          res(true);
-        });
-      });
-    });
-  }
-
-  private initFoldersAndFiles() {
-      const dir = `${__dirname}/data`;
-
-      if (!fs.existsSync(dir)){
-          fs.mkdirSync(dir);
-      }
-
-      this.createFile(config.path.application)
-          .then(() => this.createFile(config.path.clothes))
-          .then(() => this.createFile(config.path.employee))
-          .catch(err => {
-              throw err;
-          });
   }
 }
